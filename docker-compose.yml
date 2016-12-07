@@ -1,0 +1,6 @@
+dnsapi:
+  image: tuxmonteiro/dnsapi
+  ports:
+   - "8000:8000"
+   - "53:53/udp"
+   - "5353:5353/udp"
