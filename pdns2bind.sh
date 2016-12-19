@@ -19,10 +19,23 @@ POWERDNS_API="http://127.0.0.1:8000/api/v1/servers/localhost/zones"
 #
 function create {
 
-curl -s -X POST --data \
-  '{"name":"'${ZONE}'.", "kind": "Native", "masters": [], "nameservers": ["'${NS1_PREFIX}.${ZONE}'.", "'${NS2_PREFIX}.${ZONE}'."]}' \
+curl -v -X POST --data \
+  '{"name":"'${ZONE}'.", "kind": "Native", "masters": [], "nameservers": []}' \
   -H 'X-API-Key: '${POWERDNS_PASS} \
   ${POWERDNS_API} > /dev/null 2>&1
+
+exit
+
+curl -v -X PATCH --data \
+  '{"rrsets": [ {"name": "'${ZONE}'.", "type": "NS", "ttl": 3600, "changetype": "REPLACE", "records": [ {"content": "'${NS1_PREFIX}.${ZONE}'.", "disabled": false } ] } ] }' \
+  -H 'X-API-Key: '${POWERDNS_PASS} \
+  ${POWERDNS_API}/${ZONE} > /dev/null 2>&1
+
+curl -v -X PATCH --data \
+  '{"rrsets": [ {"name": "'${ZONE}'.", "type": "NS", "ttl": 3600, "changetype": "REPLACE", "records": [ {"content": "'${NS1_PREFIX}.${ZONE}'.", "disabled": false }, {"content": "'${NS2_PREFIX}.${ZONE}'.", "disabled": false } ] } ] }' \
+  -H 'X-API-Key: '${POWERDNS_PASS} \
+  ${POWERDNS_API}/${ZONE} > /dev/null 2>&1
+
 curl -s -X PATCH --data \
   '{"rrsets": [ {"name": "'${NS1_PREFIX}.${ZONE}'.", "type": "A", "ttl": 3600, "changetype": "REPLACE", "records": [ {"content": "'${NS1_IP}'", "disabled": false } ] } ] }' \
   -H 'X-API-Key: '${POWERDNS_PASS} \
